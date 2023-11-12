@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>jogo 5 meses</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-size: 30px; /* Ajuste o tamanho da fonte conforme necessário */
+            background-color: thistle; /* Cor de fundo modificada */
+        }
+
+        #player {
+            position: absolute;
+            bottom: 30px; /* Ajuste a distância do jogador em relação ao fundo da tela */
+            left: 50%;
+            transform: translateX(-50%);
+            transition: left 0.15s ease; /* Ajustado para suavizar a transição da posição do jogador */
+        }
+
+        #score {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 20px;
+        }
+
+        .obstacle {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            font-size: 40px; /* Ajuste do tamanho do coração */
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="player">👸🏾</div>
+    <div id="score">Pontuação: 0 | Nível: 1</div>
+
+    <script>
+        const player = document.getElementById('player');
+        const scoreElement = document.getElementById('score');
+        let score = 0;
+        let gameInterval;
+        let obstacleSpeed = 10; // Velocidade inicial dos obstáculos
+        let playerSpeed = 20; // Velocidade inicial do jogador
+        let level = 1;
+        let heartsPerObstacle = 2; // Quantidade de corações por obstáculo
+
+        document.addEventListener('keydown', handleKeyPress);
+
+        function handleKeyPress(event) {
+            // Obtém a posição atual do jogador
+            let playerPosition = parseInt(window.getComputedStyle(player).left);
+
+            // Define o valor de deslocamento com base na tecla pressionada
+            const movementOffset = playerSpeed;
+
+            // Movimenta o jogador conforme a tecla pressionada
+            switch (event.key) {
+                case 'a':
+                    // Move para a esquerda
+                    playerPosition = Math.max(playerPosition - movementOffset, 0);
+                    break;
+                case 'd':
+                    // Move para a direita
+                    playerPosition = Math.min(playerPosition + movementOffset, window.innerWidth - player.offsetWidth);
+                    break;
+            }
+
+            // Atualiza a posição do jogador
+            player.style.left = playerPosition + 'px';
+        }
+
+        function createObstacle() {
+            for (let i = 0; i < heartsPerObstacle; i++) {
+                setTimeout(() => {
+                    const obstacle = document.createElement('div');
+                    obstacle.className = 'obstacle';
+                    // Coração
+                    obstacle.innerHTML = '❤️';
+                    obstacle.style.left = Math.random() * (window.innerWidth - 50) + 'px';
+                    obstacle.style.top = '-50px'; // Começa acima da tela
+                    document.body.appendChild(obstacle);
+
+                    const moveObstacle = setInterval(function () {
+                        const obstaclePosition = parseInt(window.getComputedStyle(obstacle).top);
+
+                        if (obstaclePosition < window.innerHeight) {
+                            obstacle.style.top = obstaclePosition + obstacleSpeed + 'px';
+
+                            const playerRect = player.getBoundingClientRect();
+                            const obstacleRect = obstacle.getBoundingClientRect();
+
+                            // Verifica a colisão a cada movimento do obstáculo
+                            if (
+                                playerRect.bottom > obstacleRect.top &&
+                                playerRect.top < obstacleRect.bottom &&
+                                playerRect.right > obstacleRect.left &&
+                                playerRect.left < obstacleRect.right
+                            ) {
+                                clearInterval(moveObstacle);
+                                alert('hehe perdeu,me deve um beijo e uma skin..mas enquanto isso não acontece,eu deixo vc tentar de novo -.-');
+                                window.location.reload();
+                            }
+                        } else {
+                            clearInterval(moveObstacle);
+                            document.body.removeChild(obstacle);
+
+                            // Atualiza a pontuação apenas quando o obstáculo sai da tela
+                            score += 1;
+
+                            if (score % 30 === 0) {
+                                // Aumenta a velocidade dos obstáculos a cada 30 pontos
+                                obstacleSpeed += 5;
+
+                                // Aumenta a velocidade do jogador a cada 30 pontos
+                                playerSpeed += 5;
+
+                                // Aumenta a quantidade de corações por obstáculo
+                                heartsPerObstacle += 4;
+
+                                level++;
+                            }
+
+                            // Atualiza o placar
+                            updateScore();
+
+                            if (score >= 154) {
+                                clearInterval(gameInterval);
+                                alert('feliz 5 meses minha princesa,eu te amo muito');
+                                window.location.href = 'https://youtu.be/U38iGQeoX8g?si=Htj46XYQn8kpE0B_';
+                            }
+                        }
+                    }, 30); // Aumentei a velocidade dos obstáculos
+                }, i * 65); // Espaçamento entre os corações
+            }
+        }
+
+        function updateScore() {
+            scoreElement.textContent = `Pontuação: ${score} | Nível: ${level}`;
+        }
+
+        gameInterval = setInterval(createObstacle, 1500); // Inicializa o jogo
+    </script>
+</body>
+
+</html>
